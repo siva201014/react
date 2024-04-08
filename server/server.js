@@ -1,66 +1,81 @@
-const express = require('express')
-const dotenv = require('dotenv') //for .env file
-const connectDb = require('./db')
-const exphbs = require('express-handlebars')
-const session = require('express-session')
-const path = require('path')
-const methodOverride = require('method-override')
-const bodyParser = require('body-parser');
-const GitHubStrategy = require('passport-github').Strategy;
-const cors = require('cors');
+const express = require("express");
+const dotenv = require("dotenv"); //for .env file
+const connectDb = require("./db");
+const exphbs = require("express-handlebars");
+const session = require("express-session");
+const path = require("path");
+const methodOverride = require("method-override");
+const bodyParser = require("body-parser");
+const GitHubStrategy = require("passport-github").Strategy;
+const cors = require("cors");
 
 //load the .env file in config, which contains personal information for connections
-dotenv.config({path: './config/.env'})
+// dotenv.config({ path: "./server/config" });
+// Load .env file located in the server/config directory
+const path4=path.join(__dirname, "config", ".env");
+dotenv.config({ path:path4});
 
-connectDb()
+connectDb();
 
 //passport config for github authentication
-const passport = require('./config/passport');
+const passport = require("./config/passport");
 
-
-const app = express()
+const app = express();
 
 //body parser for middleware to handle form data
-app.use(express.urlencoded({extended:false}))
-app.use(bodyParser.urlencoded({extended:true}))
-app.use(express.json())
-app.use(cors());
+app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Replace with your React app's origin
+    credentials: true,
+  
+})
+);
 
 //method override for PUT and DELETE
-app.use(methodOverride(function (req, res) {
-    if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-        // look in urlencoded POST bodies and delete it
-        let method = req.body._method
-        delete req.body._method
-        return method
+app.use(
+  methodOverride(function (req, res) {
+    if (req.body && typeof req.body === "object" && "_method" in req.body) {
+      // look in urlencoded POST bodies and delete it
+      let method = req.body._method;
+      delete req.body._method;
+      return method;
     }
-}))
+  })
+);
 
 //set handlebars and middleware
-app.engine('handlebars', exphbs.engine({defaultLayout: 'main', extname:'handlebars'}))
-app.set('view engine', 'handlebars')
+app.engine(
+  "handlebars",
+  exphbs.engine({ defaultLayout: "main", extname: "handlebars" })
+);
+app.set("view engine", "handlebars");
 
 //sessions middleware
-app.use(session({
-    secret: 'cs4241a3-billingsystems',
+app.use(
+  session({
+    secret: "cs4241a3-billingsystems",
     resave: false,
     saveUninitialized: false,
-    cookie: { //store in server, not browser
-        httpOnly: true,
-        secure: false, //use http, so false
-        maxAge: 24*60*60*1000 //for one day
-    }
-}))
+    cookie: {
+      //store in server, not browser
+      httpOnly: true,
+      secure: false, //use http, so false
+      maxAge: 24 * 60 * 60 * 1000, //for one day
+    },
+  })
+);
 
 //set passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, "public")));
 
 //call the routes
-app.use('/auth', require('./routes/auth'))
-app.use('/', require('./routes/routes'))
+app.use("/auth", require("./routes/auth"));
+app.use("/", require("./routes/routes"));
 
-
-app.listen( process.env.PORT || 3000 )
+app.listen(process.env.PORT || 3000);
