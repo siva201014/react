@@ -7,7 +7,9 @@ import {useEffect, useState} from "react";
 import readBillingData from "./api/readBillingData.js";
 import {LoginPage} from "./pages/Login.jsx"
 import {DashboardPage} from "./pages/Dashboard.jsx";
-
+import BillingSystemPage from './pages/BillingSystem.jsx';
+import { ErrorPage } from './pages/Error.jsx';
+window.ENVIRONMENT = {api:'http://localhost:3000'}
 function App() {
 
     const [data, setData] = useState([])
@@ -22,6 +24,8 @@ function App() {
               <Routes>
                   <Route path="/" element={<LoginPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
+                  <Route path="/billingsystem" element={<BillingSystemPage />} />
+                  <Route path="/error" element={<ErrorPage />} />
               </Routes>
           </BrowserRouter>
 
